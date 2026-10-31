@@ -1,0 +1,2 @@
+# Ajazz / NACODEX NK68 configuration interface (USB VID:PID 258a:013b).
+SUBSYSTEM=="hidraw", ATTRS{idVendor}=="258a", ATTRS{idProduct}=="013b", MODE="0660", GROUP="plugdev", TAG+="uaccess"

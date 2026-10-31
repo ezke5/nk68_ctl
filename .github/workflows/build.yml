@@ -1,0 +1,81 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  native:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x86_64
+            os: ubuntu-latest
+            shell: bash
+            install: sudo apt-get update && sudo apt-get install -y build-essential
+            command: make
+            artifact: nk68_ctl-linux-x86_64
+          - name: macos
+            os: macos-latest
+            shell: bash
+            install: ""
+            command: make
+            artifact: nk68_ctl-macos
+          - name: windows
+            os: windows-latest
+            shell: msys2 {0}
+            install: pacman --noconfirm -Syu make mingw-w64-x86_64-gcc
+            command: make
+            artifact: nk68_ctl-windows
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up MSYS2
+        if: matrix.name == 'windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+      - name: Install build tools
+        if: matrix.install != ''
+        run: ${{ matrix.install }}
+      - name: Build
+        run: ${{ matrix.command }}
+      - name: Smoke test
+        run: make test
+      - name: Package
+        run: |
+          mkdir -p dist
+          cp nk68_ctl dist/
+          cp README.md LICENSE dist/
+          tar -czf ${{ matrix.artifact }}.tar.gz -C dist .
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.artifact }}.tar.gz
+
+  release:
+    name: Publish release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: native
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: release
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" release/**/*.tar.gz --generate-notes

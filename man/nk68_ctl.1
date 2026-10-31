@@ -1,0 +1,50 @@
+.TH NK68_CTL 1 "October 2026" "nk68_ctl" "User Commands"
+.SH NAME
+nk68_ctl \- control Ajazz/NACODEX NK68 keyboard lighting
+.SH SYNOPSIS
+.B nk68_ctl
+.B --get
+.br
+.B nk68_ctl
+.B --mode
+.I MODE
+[options]
+.br
+.B nk68_ctl
+.I MODE SPEED BRIGHTNESS
+.SH DESCRIPTION
+.B nk68_ctl
+sets or reads the lighting state of an Ajazz/NACODEX NK68 keyboard through
+its Linux hidraw configuration interface.
+.SH OPTIONS
+.TP
+.BR -g ", " --get
+Read and print the current lighting state.
+.TP
+.BR -m ", " --mode " " MODE
+Select mode 1 through 13. Mode 13 turns the backlight off.
+.TP
+.BR -s ", " --speed " " SPEED
+Set speed from 1 through 5. The default is 3.
+.TP
+.BR -b ", " --brightness " " LEVEL
+Set brightness from 0 through 5. The default is 5.
+.TP
+.BR -h ", " --help
+Print usage information.
+.SH EXAMPLES
+.EX
+nk68_ctl --get
+nk68_ctl --mode 1 --speed 3 --brightness 5
+nk68_ctl 13
+.EE
+.SH FILES
+.TP
+.I /etc/udev/rules.d/99-nk68.rules
+Optional permission rule installed by
+.BR make install .
+.SH EXIT STATUS
+Zero indicates success. Non-zero indicates invalid arguments, an unavailable
+device, insufficient permissions, or an HID operation failure.
+.SH SEE ALSO
+.BR udev(7)
