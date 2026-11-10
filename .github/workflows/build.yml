@@ -22,30 +22,12 @@ jobs:
             install: sudo apt-get update && sudo apt-get install -y build-essential
             command: make
             artifact: nk68_ctl-linux-x86_64
-          - name: macos
-            os: macos-latest
-            shell: bash
-            install: ""
-            command: make
-            artifact: nk68_ctl-macos
-          - name: windows
-            os: windows-latest
-            shell: msys2 {0}
-            install: pacman --noconfirm -Syu make mingw-w64-x86_64-gcc
-            command: make
-            artifact: nk68_ctl-windows
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         shell: ${{ matrix.shell }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up MSYS2
-        if: matrix.name == 'windows'
-        uses: msys2/setup-msys2@v2
-        with:
-          msystem: MINGW64
-          update: true
       - name: Install build tools
         if: matrix.install != ''
         run: ${{ matrix.install }}
