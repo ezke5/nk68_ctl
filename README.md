@@ -11,7 +11,6 @@ compile the command-line layer and report that the HID backend is unsupported.
 
 ```sh
 make
-make test
 ```
 
 The build uses `-O2`, dependency files, warnings, and separate modules for CLI,
@@ -35,25 +34,11 @@ Add your user to `plugdev` if your distribution uses that group:
 ```sh
 sudo usermod -aG plugdev "$USER"
 ```
+`If plugdev group does not exist; simply create, then execute the command.`
 
-Log out and back in after changing group membership. Without the udev rule,
+Afterward, log out and back in after changing group membership. Without the udev rule,
 the program may require access to `/dev/hidrawN`; do not use broad `chmod 666`
 rules.
-
-### Chroot and container permissions
-
-For a chroot or container, pass through the matching `/dev/hidrawN` device and
-the sysfs tree used for discovery:
-
-```sh
-mount --bind /sys /path/to/chroot/sys
-mount --bind /dev /path/to/chroot/dev
-```
-
-The process must retain read/write permission on the hidraw node. In Docker,
-use a narrowly scoped device mapping such as `--device=/dev/hidrawN`, rather
-than `--privileged`; the host udev rule still controls the device node mode.
-The device number can change after reconnecting the keyboard.
 
 ## Usage
 
@@ -70,9 +55,10 @@ backlight off.
 ## GitHub Actions
 
 The workflow in `.github/workflows/build.yml` performs native builds and smoke
-tests on Ubuntu, macOS, and Windows (MSYS2), then uploads a platform artifact.
-Only Linux can communicate with the keyboard; the other builds validate the
-portable CLI and packaging surface.
+test on Ubuntu, then uploads a platform artifact.
+
+## Attention
+**Only Linux can communicate with the keyboard.**
 
 ## License
 
